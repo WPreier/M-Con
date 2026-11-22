@@ -1,0 +1,66 @@
+#!/bin/sh
+# Enforces SemVer bumps for Conventional Commits.
+# fix: -> patch, feat: -> minor, BREAKING CHANGE or type!: -> major.
+# Enable with: git config core.hooksPath scripts/hooks
+
+set -u
+MSG_FILE=${1:-}
+if [ -z "$MSG_FILE" ] || [ ! -f "$MSG_FILE" ]; then
+  echo "mcon commit-msg: missing message file" >&2
+  exit 1
+fi
+if grep -q '^Merge ' "$MSG_FILE"; then
+  exit 0
+fi
+
+MSG=$(grep -v '^#' "$MSG_FILE" || true)
+SUBJECT=$(printf '%s\n' "$MSG" | head -n 1)
+BUMP=none
+if printf '%s\n' "$MSG" | grep -q 'BREAKING CHANGE'; then
+  BUMP=major
+elif printf '%s' "$SUBJECT" | grep -Eq '^[a-zA-Z]+(\([^)]+\))?!:'; then
+  BUMP=major
+elif printf '%s' "$SUBJECT" | grep -Eq '^feat(\([^)]+\))?:'; then
+  BUMP=minor
+elif printf '%s' "$SUBJECT" | grep -Eq '^fix(\([^)]+\))?:'; then
+  BUMP=patch
+fi
+if [ "$BUMP" = none ]; then
+  exit 0
+fi
+if ! git rev-parse --verify HEAD >/dev/null 2>&1; then
+  exit 0
+fi
+PREV=$(git show HEAD:VERSION 2>/dev/null | tr -d '[:space:]' || true)
+if [ -z "$PREV" ]; then
+  exit 0
+fi
+NEW=$(git show :VERSION 2>/dev/null | tr -d '[:space:]' || true)
+if [ -z "$NEW" ]; then
+  NEW=$(tr -d '[:space:]' < VERSION)
+fi
+
+major=$(printf '%s' "$PREV" | cut -d. -f1)
+minor=$(printf '%s' "$PREV" | cut -d. -f2)
+patch=$(printf '%s' "$PREV" | cut -d. -f3)
+case "$BUMP" in
+  major) major=$((major + 1)); minor=0; patch=0 ;;
+  minor) minor=$((minor + 1)); patch=0 ;;
+  patch) patch=$((patch + 1)) ;;
+esac
+EXPECT="$major.$minor.$patch"
+if [ "$NEW" != "$EXPECT" ]; then
+  echo "mcon commit-msg: $SUBJECT requires a $BUMP bump: $PREV -> $EXPECT (VERSION is $NEW)" >&2
+  echo "Update VERSION and add a ## [$EXPECT] section to CHANGELOG.md, then stage both files." >&2
+  exit 1
+fi
+if git show :CHANGELOG.md >/dev/null 2>&1; then
+  LOG=$(git show :CHANGELOG.md)
+else
+  LOG=$(cat CHANGELOG.md)
+fi
+if ! printf '%s\n' "$LOG" | grep -q "\\[$EXPECT\\]"; then
+  echo "mcon commit-msg: CHANGELOG.md is missing [$EXPECT]" >&2
+  exit 1
+fi
+exit 0

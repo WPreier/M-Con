@@ -1,0 +1,7 @@
+# Client configuration for mcon-ctl. Copy outside the repo and fill in real values.
+public_url: https://127.0.0.1:8687
+admin_url: http://127.0.0.1:8688
+key_id: website
+hmac_secret: change-me-hmac-secret
+admin_token: change-me-admin-token
+insecure_skip_verify: false

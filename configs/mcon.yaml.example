@@ -1,0 +1,159 @@
+# M-Con service configuration. Copy to /etc/mcon/mcon.yaml (mode 0640).
+# Secrets live in a separate file. Do not put credentials here.
+
+server:
+  public_addr: ":8687"
+  admin_addr: "127.0.0.1:8688"
+  read_timeout: 15s
+  write_timeout: 30s
+  idle_timeout: 60s
+  shutdown_timeout: 20s
+  max_body_bytes: 26214400
+  watchdog_interval: 10s
+  tls:
+    enabled: true
+    cert_file: /etc/mcon/tls/cert.pem
+    key_file: /etc/mcon/tls/key.pem
+
+paths:
+  data_dir: /var/lib/mcon
+  db_file: /var/lib/mcon/mcon.db
+  archive_dir: /var/lib/mcon/archive
+  tmp_dir: /var/lib/mcon/tmp
+  backup_dir: /var/lib/mcon/backups
+
+log:
+  level: info
+  syslog:
+    enabled: true
+    network: unix
+    address: /dev/log
+    facility: mail
+    tag: mcon
+
+metrics:
+  enabled: true
+
+queue:
+  workers: 2
+  poll_interval: 500ms
+  lease: 60s
+  max_attempts: 8
+  backoff_initial: 5s
+  backoff_max: 1h
+  backoff_multiplier: 2
+
+circuit_breaker:
+  failure_threshold: 5
+  cooldown: 30s
+
+spam:
+  enabled: true
+  mode: failover
+  timeout: 8s
+  on_timeout: send
+  on_error: send
+  threshold: 0.8
+  ollama:
+    base_url: http://127.0.0.1:11434
+    model: llama3.2
+    timeout: 6s
+  openrouter:
+    base_url: https://openrouter.ai/api/v1
+    model: openai/gpt-4o-mini
+    timeout: 8s
+
+providers:
+  default: smtp-local
+  items:
+    smtp-local:
+      type: smtp
+      host: 127.0.0.1
+      port: 25
+      tls_mode: none
+      username: ""
+      helo: mcon.local
+      timeout: 30s
+      fallback: ""
+    smtp-relay:
+      type: smtp
+      host: smtp.example.com
+      port: 587
+      tls_mode: starttls
+      username: ""
+      helo: mcon.example.com
+      timeout: 30s
+    sendgrid:
+      type: sendgrid
+      base_url: https://api.sendgrid.com
+      timeout: 30s
+      fallback: smtp-local
+    mailgun:
+      type: mailgun
+      base_url: https://api.mailgun.net
+      domain: mg.example.com
+      timeout: 30s
+    ses:
+      type: ses
+      region: eu-central-1
+      timeout: 30s
+    postmark:
+      type: postmark
+      base_url: https://api.postmarkapp.com
+      timeout: 30s
+    brevo:
+      type: brevo
+      base_url: https://api.brevo.com
+      timeout: 30s
+    resend:
+      type: resend
+      base_url: https://api.resend.com
+      timeout: 30s
+    graph:
+      type: graph
+      base_url: https://graph.microsoft.com/v1.0
+      send_as: sender@example.com
+      timeout: 30s
+    gmail:
+      type: gmail
+      base_url: https://gmail.googleapis.com
+      token_url: https://oauth2.googleapis.com/token
+      timeout: 30s
+
+clients:
+  website:
+    allowed_from:
+      - noreply@example.com
+    allowed_providers: []
+    max_recipients: 20
+    max_message_bytes: 10485760
+    max_attachments: 10
+    rate_limit:
+      rps: 5
+      burst: 10
+    webhook_url: ""
+
+archive:
+  enabled: true
+
+idempotency:
+  ttl: 24h
+
+security:
+  hmac_window: 5m
+  nonce_ttl: 10m
+  admin_allow_cidrs:
+    - 127.0.0.1/32
+    - ::1/128
+
+dedupe:
+  enabled: true
+  window: 10m
+
+backup:
+  enabled: true
+  interval: 24h
+
+test_ui:
+  enabled: true
+  client_key_id: website

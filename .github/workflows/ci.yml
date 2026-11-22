@@ -1,0 +1,25 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: test
+        run: go test ./...
+      - name: version consistency
+        run: |
+          set -eu
+          v=$(tr -d ' \r\n' < VERSION)
+          grep -F "[$v]" CHANGELOG.md
+          go build -ldflags "-X mcon/internal/version.Version=$v" -o /tmp/mcon ./cmd/mcon
+          go build -ldflags "-X mcon/internal/version.Version=$v" -o /tmp/mcon-ctl ./cmd/mcon-ctl
+          test "$(/tmp/mcon -version)" = "$v"
+          test "$(/tmp/mcon-ctl -version)" = "$v"

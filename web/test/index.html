@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>M-Con Test</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <h1>M-Con Test</h1>
+    <p>Die Seite spricht die Admin-API an. Der Dienst signiert die Nachricht serverseitig.</p>
+    <label>Admin-Token <input id="token" type="password" autocomplete="off"></label>
+    <form id="mail">
+      <label>From <input name="from" value="noreply@example.com" required></label>
+      <label>To <input name="to" placeholder="a@b.c, c@d.e" required></label>
+      <label>Cc <input name="cc"></label>
+      <label>Bcc <input name="bcc"></label>
+      <label>Reply-To <input name="reply_to"></label>
+      <label>Subject <input name="subject" required></label>
+      <label>Text <textarea name="text" rows="5"></textarea></label>
+      <label>HTML <textarea name="html" rows="4"></textarea></label>
+      <label>Provider <input name="provider" placeholder="leer = default"></label>
+      <label>Spam-Hinweis <input name="spam_hint"></label>
+      <label>Header-Name <input name="header_name" placeholder="X-Form"></label>
+      <label>Header-Wert <input name="header_value"></label>
+      <label>Tags <input name="tags" placeholder="contact,web"></label>
+      <label>Metadata <input name="metadata" placeholder='{"form":"contact"}'></label>
+      <label>Anhang <input name="attachment" type="file"></label>
+      <button type="submit">Senden</button>
+    </form>
+    <section>
+      <h2>Status</h2>
+      <pre id="out">noch keine Nachricht</pre>
+      <button id="resend" type="button">Resend</button>
+      <label><input id="skip" type="checkbox"> skip_spam</label>
+      <button id="replay" type="button">Replay</button>
+    </section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

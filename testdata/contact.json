@@ -1,0 +1,12 @@
+{
+  "from": "noreply@example.com",
+  "to": ["user@example.com"],
+  "reply_to": "person@example.com",
+  "subject": "Kontaktformular",
+  "text": "Bitte um Rueckruf.",
+  "html": "<p>Bitte um Rueckruf.</p>",
+  "headers": {"X-Form": "contact"},
+  "tags": ["contact"],
+  "metadata": {"form": "contact"},
+  "spam": {"hint": "contact form"}
+}

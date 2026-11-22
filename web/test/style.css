@@ -1,0 +1,7 @@
+body { font-family: sans-serif; margin: 2rem; color: #1c2430; background: #f6f7f9; }
+main { max-width: 42rem; }
+form, section { display: grid; gap: 0.6rem; background: white; padding: 1rem; border: 1px solid #d8dee8; }
+label { display: grid; gap: 0.2rem; font-size: 0.9rem; }
+input, textarea, button { font: inherit; padding: 0.4rem; }
+button { width: fit-content; }
+pre { white-space: pre-wrap; background: #111; color: #e8eef7; padding: 0.8rem; }

@@ -1,0 +1,8 @@
+d /var/lib/mcon 0700 mcon mcon -
+d /var/lib/mcon/archive 0700 mcon mcon -
+d /var/lib/mcon/tmp 0700 mcon mcon -
+d /var/lib/mcon/backups 0700 mcon mcon -
+d /etc/mcon 0750 root mcon -
+d /etc/mcon/tls 0750 root mcon -
+z /etc/mcon/mcon.yaml 0640 root mcon -
+z /etc/mcon/secrets.yaml 0440 root mcon -

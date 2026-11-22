@@ -1,0 +1,14 @@
+/bin/
+/dist/
+/mcon
+/mcon.exe
+/mcon-ctl
+/mcon-ctl.exe
+*.db
+*.db-wal
+*.db-shm
+*.eml
+/var/
+.env
+secrets.yaml
+mcon.yaml

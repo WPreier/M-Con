@@ -1,0 +1,4 @@
+[
+  {"name": "ham", "subject": "Frage zum Termin", "text": "Koennen wir den Termin verschieben?", "spam": false},
+  {"name": "phish", "subject": "Konto gesperrt", "text": "Klicken Sie sofort auf den Link und geben Sie Ihr Passwort ein.", "spam": true}
+]
