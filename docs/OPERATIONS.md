@@ -2,11 +2,14 @@
 
 ## Installation
 
-Binaries nach `/usr/local/bin/mcon` und `/usr/local/bin/mcon-ctl`. Konfiguration nach `/etc/mcon/`. Der Dienstbenutzer `mcon` kommt aus `deploy/mcon.sysusers`, die Verzeichnisse aus `deploy/mcon.tmpfiles`. Die Unit ist `deploy/mcon.service` (`Type=notify`, `WatchdogSec=30s`, `ProtectSystem=strict`, `NoNewPrivileges`, Schreibrecht nur auf `/var/lib/mcon`).
+Die vollständige Installationsanleitung steht in [INSTALL.md](INSTALL.md).
+
+Kurz: Binaries nach `/usr/local/bin/`, Config und Secrets nach `/etc/mcon/` (`mcon.yaml`, **`secrets.yaml`**). Der Dienstbenutzer kommt aus `deploy/mcon.sysusers`, Verzeichnisse aus `deploy/mcon.tmpfiles`, Unit aus `deploy/mcon.service` (`Type=notify`, `WatchdogSec=30s`, `ProtectSystem=strict`, Schreibrecht nur auf `/var/lib/mcon`).
 
 ```
 install -d -o mcon -g mcon -m 0700 /var/lib/mcon /var/lib/mcon/archive /var/lib/mcon/tmp /var/lib/mcon/backups
 install -m 0755 mcon mcon-ctl /usr/local/bin/
+# secrets: /etc/mcon/secrets.yaml (0440 root:mcon) — siehe INSTALL.md
 systemctl enable --now mcon
 ```
 

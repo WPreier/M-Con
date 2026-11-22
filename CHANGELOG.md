@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-11-23
+
+### Added
+
+- Detailed installation guide in `docs/INSTALL.md` (build, systemd paths, checklist, troubleshooting).
+
+### Changed
+
+- Documented production secrets path `/etc/mcon/secrets.yaml` (`0440`, `root:mcon`) in INSTALL, CONFIG, OPERATIONS, README, and the secrets example.
+
 ## [0.1.0] - 2026-11-22
 
 ### Added

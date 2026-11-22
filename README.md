@@ -18,7 +18,7 @@ go build -ldflags "-X mcon/internal/version.Version=$(cat VERSION)" -o mcon ./cm
 
 Ohne `-config` und `-secrets` endet der Prozess mit Status 1. `-version` gibt die SemVer aus.
 
-Betrieb, Signale und systemd stehen in [docs/OPERATIONS.md](docs/OPERATIONS.md). Schnittstelle, Konfiguration, Architektur und Tests: [docs/API.md](docs/API.md), [docs/CONFIG.md](docs/CONFIG.md), [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/TESTING.md](docs/TESTING.md).
+Installation Schritt für Schritt: [docs/INSTALL.md](docs/INSTALL.md) (`secrets.yaml` unter `/etc/mcon/secrets.yaml`). Betrieb und Signale: [docs/OPERATIONS.md](docs/OPERATIONS.md). Schnittstelle, Konfiguration, Architektur und Tests: [docs/API.md](docs/API.md), [docs/CONFIG.md](docs/CONFIG.md), [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/TESTING.md](docs/TESTING.md).
 
 ## Tests
 
@@ -26,4 +26,4 @@ Betrieb, Signale und systemd stehen in [docs/OPERATIONS.md](docs/OPERATIONS.md).
 go test ./...
 ```
 
-Version `0.1.0`. Conventional Commits (`feat`, `fix`, `BREAKING CHANGE`) prüft `scripts/hooks/commit-msg`.
+Version `0.1.1`. Conventional Commits (`feat`, `fix`, `BREAKING CHANGE`) prüft `scripts/hooks/commit-msg`.

@@ -2,7 +2,7 @@
 
 `mcon.yaml` und `secrets.yaml` werden getrennt geladen. Beispiele liegen unter `configs/*.example`. Secrets werden nicht ins Repository geschrieben.
 
-`mcon -config` und `mcon -secrets` sind Pflicht, ersatzweise `MCON_CONFIG` und `MCON_SECRETS`. Ohne beide Dateien endet der Prozess mit Status 1. SIGHUP und `POST /admin/v1/reload` übernehmen eine neue Fassung nur, wenn `Validate` erfolgreich ist.
+`mcon -config` und `mcon -secrets` sind Pflicht, ersatzweise `MCON_CONFIG` und `MCON_SECRETS`. Ohne beide Dateien endet der Prozess mit Status 1. Es gibt **keinen** automatischen Suchpfad im Arbeitsverzeichnis. Unter systemd lautet der Standardpfad **`/etc/mcon/secrets.yaml`** (siehe [INSTALL.md](INSTALL.md)). SIGHUP und `POST /admin/v1/reload` übernehmen eine neue Fassung nur, wenn `Validate` erfolgreich ist.
 
 ## Wichtige Regeln
 
@@ -24,7 +24,7 @@
 | `paths.tmp_dir` | `/var/lib/mcon/tmp` |
 | `paths.backup_dir` | `/var/lib/mcon/backups` |
 
-Das State-Verzeichnis ist `0700`, die Secrets-Datei `0400`, die Konfiguration `0640`.
+Das State-Verzeichnis ist `0700`, die Secrets-Datei `0440` (`root:mcon`), die Konfiguration `0640` (`root:mcon`).
 
 ## Queue, Breaker, Dedupe
 
