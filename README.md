@@ -26,4 +26,4 @@ Installation Schritt für Schritt: [docs/INSTALL.md](docs/INSTALL.md) (`secrets.
 go test ./...
 ```
 
-Version `0.1.1`. Conventional Commits (`feat`, `fix`, `BREAKING CHANGE`) prüft `scripts/hooks/commit-msg`.
+Version `0.1.2`. Conventional Commits (`feat`, `fix`, `BREAKING CHANGE`) prüft `scripts/hooks/commit-msg`.

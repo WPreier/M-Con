@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-11-23
+
+### Fixed
+
+- Smoke test now asserts against `version.Version` instead of a hardcoded `0.1.0`, so CI stays green after patch bumps.
+
 ## [0.1.1] - 2026-11-23
 
 ### Added

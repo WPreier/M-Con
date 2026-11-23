@@ -9,6 +9,7 @@ import (
 
 	"mcon/internal/config"
 	"mcon/internal/ctl"
+	"mcon/internal/version"
 )
 
 func TestSmokeSend(t *testing.T) {
@@ -61,9 +62,9 @@ func TestSmokeSend(t *testing.T) {
 		t.Fatalf("status %s %v", status, err)
 	}
 	ver, err := ctl.Version(ctx, opt)
-	if err != nil || ver != "0.1.0" {
+	if err != nil || ver != version.Version {
 		cancel()
-		t.Fatalf("version %s %v", ver, err)
+		t.Fatalf("version %s %v (want %s)", ver, err, version.Version)
 	}
 	cancel()
 	select {
