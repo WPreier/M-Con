@@ -68,7 +68,7 @@ sudo install -d -m 0755 /usr/local/src
 cd /usr/local/src
 sudo git clone https://github.com/WPreier/M-Con.git
 cd M-Con
-git checkout v0.1.3   # oder ein neuerer Tag
+git checkout v0.1.4   # oder ein neuerer Tag
 
 v=$(tr -d ' \r\n' < VERSION)
 go build -ldflags "-X mcon/internal/version.Version=$v" -o mcon ./cmd/mcon
@@ -78,7 +78,7 @@ go build -ldflags "-X mcon/internal/version.Version=$v" -o mcon-ctl ./cmd/mcon-c
 ./mcon-ctl -version
 ```
 
-Beide Befehle müssen die gleiche SemVer ausgeben (z. B. `0.1.3`).
+Beide Befehle müssen die gleiche SemVer ausgeben (z. B. `0.1.4`).
 
 Optional Tests vor dem Deploy:
 

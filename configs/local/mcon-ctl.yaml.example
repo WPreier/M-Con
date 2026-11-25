@@ -1,6 +1,8 @@
 # Copy to configs/local/mcon-ctl.yaml. Values must match secrets.yaml / clients.local.
-public_url: http://127.0.0.1:8687
-admin_url: http://127.0.0.1:8688
+# Must be http:// when local mcon.yaml has tls.enabled: false (default).
+# https:// only if you point at a TLS listener (e.g. production) — then set insecure_skip_verify as needed.
+public_url: http://127.0.0.1:18687
+admin_url: http://127.0.0.1:18688
 key_id: local
 hmac_secret: local-hmac-secret-change-me
 admin_token: local-admin-token-change-me

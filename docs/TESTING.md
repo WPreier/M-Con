@@ -58,7 +58,7 @@ MCON_TEST_TO='du@example.com' scripts/local-mail-test.sh --send-only
 MCON_TEST_TO='du@example.com' scripts/local-mail-test.sh --keep
 ```
 
-Das Skript baut `bin/mcon` und `bin/mcon-ctl`, legt State unter `./var/local/` ab (gitignored), startet auf `127.0.0.1:8687` / `:8688` ohne TLS und wartet auf `state=sent`.
+Das Skript baut `bin/mcon` und `bin/mcon-ctl`, legt State unter `./var/local/` ab (gitignored), startet auf **`127.0.0.1:18687` / `:18688`** ohne TLS (eigene Ports, damit der Produktionsdienst auf `:8687`/`:8688` nicht stört) und wartet auf `state=sent`.
 
 Hinweise:
 
@@ -66,6 +66,36 @@ Hinweise:
 - Spam ist in der Local-Config aus (`spam.enabled: false`).
 - Zum Debuggen ohne Zustellung `providers.default: discard` setzen.
 - Nach dem Test Posteingang **und** Spam-Ordner prüfen; Provider-Fehler stehen in `var/local/mcon.log`.
+- Test-UI: `http://127.0.0.1:18688/test/`
+
+### Fehler: `Client sent an HTTP request to an HTTPS server`
+
+`mcon-ctl` spricht **HTTP**, der Listener auf dem Port erwartet aber **HTTPS**. Typisch: Produktions-`mcon` mit TLS läuft noch auf `:8687`, und `public_url` zeigt dorthin (`http://127.0.0.1:8687`).
+
+Fix:
+
+1. Local-Ports nutzen (siehe `configs/local/*.example`):
+
+```bash
+# in configs/local/mcon.yaml
+server.public_addr: "127.0.0.1:18687"
+server.admin_addr:  "127.0.0.1:18688"
+server.tls.enabled: false
+
+# in configs/local/mcon-ctl.yaml
+public_url: http://127.0.0.1:18687
+admin_url:  http://127.0.0.1:18688
+```
+
+2. Oder bewusst gegen Produktion mit TLS testen:
+
+```yaml
+public_url: https://127.0.0.1:8687
+admin_url: http://127.0.0.1:8688
+insecure_skip_verify: true   # nur bei self-signed / lokalem Cert
+```
+
+Schema und Port müssen zum laufenden Listener passen (`http` ↔ `tls.enabled: false`, `https` ↔ `tls.enabled: true`).
 
 ## Versionierung
 

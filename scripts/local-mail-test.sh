@@ -75,16 +75,52 @@ prepare_dirs() {
   mkdir -p "$ROOT/var/local/archive" "$ROOT/var/local/tmp" "$ROOT/var/local/backups" "$ROOT/bin"
 }
 
+admin_url() {
+  # Prefer mcon-ctl.yaml admin_url so ports stay in sync with the local config.
+  awk -F': *' '/^admin_url:/ { gsub(/["\r]/,"",$2); print $2; exit }' "$CTL"
+}
+
+public_url() {
+  awk -F': *' '/^public_url:/ { gsub(/["\r]/,"",$2); print $2; exit }' "$CTL"
+}
+
+check_scheme() {
+  pub=$(public_url)
+  case "$pub" in
+    https://*)
+      echo "warning: public_url is HTTPS ($pub)." >&2
+      echo "Local default has tls.enabled: false — use http://127.0.0.1:18687 unless you intentionally target a TLS listener." >&2
+      ;;
+    http://*)
+      # Probe: plaintext HTTP against an HTTPS port yields this Go/net body.
+      code=$(curl -s -o /tmp/mcon-local-probe.out -w '%{http_code}' "$pub/v1/messages" 2>/dev/null || true)
+      if [ -f /tmp/mcon-local-probe.out ] && grep -qi 'Client sent an HTTP request to an HTTPS server' /tmp/mcon-local-probe.out 2>/dev/null; then
+        echo "error: $pub speaks HTTPS, but mcon-ctl uses http://." >&2
+        echo "Likely the production service on :8687 is answering (TLS on)." >&2
+        echo "Fix: use local ports 18687/18688 (see configs/local/*.example), or set public_url to https://… and insecure_skip_verify as needed." >&2
+        rm -f /tmp/mcon-local-probe.out
+        exit 1
+      fi
+      rm -f /tmp/mcon-local-probe.out
+      _=$code
+      ;;
+  esac
+}
+
 wait_ready() {
+  adm=$(admin_url)
+  if [ -z "$adm" ]; then
+    adm="http://127.0.0.1:18688"
+  fi
   i=0
   while [ "$i" -lt 50 ]; do
-    if curl --fail --silent "http://127.0.0.1:8688/readyz" >/dev/null 2>&1; then
+    if curl --fail --silent "$adm/readyz" >/dev/null 2>&1; then
       return 0
     fi
     i=$((i + 1))
     sleep 0.1
   done
-  echo "mcon did not become ready; last log lines:" >&2
+  echo "mcon did not become ready at $adm/readyz; last log lines:" >&2
   tail -n 40 "$LOGFILE" 2>/dev/null || true
   return 1
 }
@@ -172,22 +208,24 @@ case "$MODE" in
   daemon)
     trap 'stop_mcon' INT TERM
     echo "foreground local mcon — Ctrl-C to stop"
-    echo "  admin:  http://127.0.0.1:8688/test/"
-    echo "  health: http://127.0.0.1:8688/healthz"
+    echo "  admin:  $(admin_url)/test/"
+    echo "  health: $(admin_url)/healthz"
     cd "$ROOT"
     exec "$ROOT/bin/mcon" -config "$CFG" -secrets "$SEC"
     ;;
   send)
+    check_scheme
     send_mail
     ;;
   run)
     trap 'if [ "$KEEP" -eq 0 ]; then stop_mcon; fi' EXIT INT TERM
     start_mcon
+    check_scheme
     send_mail
     if [ "$KEEP" -eq 1 ]; then
       trap - EXIT
       echo "mcon left running (pid $(cat "$PIDFILE")); stop with: kill \$(cat var/local/mcon.pid)"
-      echo "test UI: http://127.0.0.1:8688/test/"
+      echo "test UI: $(admin_url)/test/"
     fi
     ;;
 esac

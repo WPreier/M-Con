@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.4] - 2026-11-25
+
+### Changed
+
+- Local mail test uses dedicated ports `18687`/`18688` so it does not collide with a TLS production listener on `:8687`.
+- Documented and detected the HTTP-vs-HTTPS mismatch (`Client sent an HTTP request to an HTTPS server`) in TESTING.md and `scripts/local-mail-test.sh`.
+
 ## [0.1.3] - 2026-11-25
 
 ### Added
