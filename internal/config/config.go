@@ -157,21 +157,22 @@ type Providers struct {
 
 // Provider is one named backend. Unused fields depend on Type.
 type Provider struct {
-	Type      string   `yaml:"type"`
-	Fallback  string   `yaml:"fallback"`
-	Timeout   Duration `yaml:"timeout"`
-	Host      string   `yaml:"host"`
-	Port      int      `yaml:"port"`
-	TLSMode   string   `yaml:"tls_mode"`
-	Username  string   `yaml:"username"`
-	HELO      string   `yaml:"helo"`
-	BaseURL   string   `yaml:"base_url"`
-	Domain    string   `yaml:"domain"`
-	Region    string   `yaml:"region"`
-	TokenURL  string   `yaml:"token_url"`
-	SendAs    string   `yaml:"send_as"`
-	Mode      string   `yaml:"mode"`
-	FailTimes int      `yaml:"fail_times"`
+	Type                   string   `yaml:"type"`
+	Fallback               string   `yaml:"fallback"`
+	Timeout                Duration `yaml:"timeout"`
+	Host                   string   `yaml:"host"`
+	Port                   int      `yaml:"port"`
+	TLSMode                string   `yaml:"tls_mode"`
+	TLSInsecureSkipVerify  bool     `yaml:"tls_insecure_skip_verify"`
+	Username               string   `yaml:"username"`
+	HELO                   string   `yaml:"helo"`
+	BaseURL                string   `yaml:"base_url"`
+	Domain                 string   `yaml:"domain"`
+	Region                 string   `yaml:"region"`
+	TokenURL               string   `yaml:"token_url"`
+	SendAs                 string   `yaml:"send_as"`
+	Mode                   string   `yaml:"mode"`
+	FailTimes              int      `yaml:"fail_times"`
 }
 
 // Client is a public-API caller identified by a key id.

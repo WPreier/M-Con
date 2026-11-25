@@ -28,4 +28,4 @@ go test ./...
 
 Lokaler Echtversand per SMTP: [docs/TESTING.md](docs/TESTING.md) und `scripts/local-mail-test.sh`.
 
-Version `0.1.4`. Conventional Commits (`feat`, `fix`, `BREAKING CHANGE`) prüft `scripts/hooks/commit-msg`.
+Version `0.1.5`. Conventional Commits (`feat`, `fix`, `BREAKING CHANGE`) prüft `scripts/hooks/commit-msg`.

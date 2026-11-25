@@ -28,7 +28,7 @@ func buildRegistry(cfg config.Config, sec config.Secrets) *provider.Registry {
 		case "discard":
 			sender = &discard.Provider{Mode: item.Mode, FailTimes: item.FailTimes}
 		case "smtp":
-			sender = &smtp.Client{Host: item.Host, Port: item.Port, TLSMode: item.TLSMode, Username: item.Username, Password: secret.Password, HELO: item.HELO, Timeout: timeout}
+			sender = &smtp.Client{Host: item.Host, Port: item.Port, TLSMode: item.TLSMode, InsecureSkipVerify: item.TLSInsecureSkipVerify, Username: item.Username, Password: secret.Password, HELO: item.HELO, Timeout: timeout}
 		case "sendgrid":
 			sender = &sendgrid.Client{BaseURL: item.BaseURL, APIKey: secret.APIKey, Timeout: timeout, HTTP: client}
 		case "mailgun":

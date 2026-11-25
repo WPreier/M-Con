@@ -59,6 +59,18 @@ func TestPlaintextRemoteRejected(t *testing.T) {
 	}
 }
 
+func TestTLSConfigInsecureSkipVerify(t *testing.T) {
+	c := &Client{Host: "smtp.internal.example", InsecureSkipVerify: true}
+	cfg := c.tlsConfig()
+	if !cfg.InsecureSkipVerify || cfg.ServerName != "smtp.internal.example" {
+		t.Fatalf("%+v", cfg)
+	}
+	c2 := &Client{Host: "smtp.example.com"}
+	if c2.tlsConfig().InsecureSkipVerify {
+		t.Fatal("default must verify certificates")
+	}
+}
+
 func serveSink(ln net.Listener) {
 	for {
 		conn, err := ln.Accept()

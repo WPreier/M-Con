@@ -8,6 +8,7 @@
 
 - `server.admin_addr` muss Loopback sein. Liegt `server.public_addr` nicht auf Loopback, ist TLS Pflicht.
 - SMTP mit `tls_mode: none` ist nur zu `127.0.0.1`, `::1` oder `localhost` gültig. Fernstrecke nutzt `starttls` oder `tls`.
+- Interne/abgelaufene SMTP-Zertifikate: `providers.items.<name>.tls_insecure_skip_verify: true` (nur SMTP; Standard `false`).
 - Jeder Client braucht `allowed_from` und ein HMAC-Secret von mindestens 16 Zeichen. Das Admin-Token ebenfalls.
 - `spam.mode` ist `failover`, `ollama` oder `openrouter`. `on_timeout` und `on_error` sind `send` oder `block`.
 - OpenRouter braucht `secrets.spam.openrouter.api_key`, sobald der Modus es verwendet. Ollama spricht `spam.ollama.base_url` (auf ppclmt2 typisch `http://127.0.0.1:11434`).

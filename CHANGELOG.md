@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.5] - 2026-11-25
+
+### Added
+
+- SMTP option `tls_insecure_skip_verify` to skip certificate verification for internal/self-signed/expired relay certs (`starttls` and `tls`).
+
 ## [0.1.4] - 2026-11-25
 
 ### Changed

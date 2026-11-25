@@ -80,6 +80,8 @@ providers:
       host: smtp.example.com
       port: 587
       tls_mode: starttls
+      # Set true for internal/self-signed/expired SMTP certs (skips verify).
+      tls_insecure_skip_verify: false
       username: ""
       helo: mcon.example.com
       timeout: 30s

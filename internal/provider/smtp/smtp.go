@@ -18,13 +18,22 @@ import (
 
 // Client is an SMTP delivery adapter.
 type Client struct {
-	Host     string
-	Port     int
-	TLSMode  string
-	Username string
-	Password string
-	HELO     string
-	Timeout  time.Duration
+	Host                  string
+	Port                  int
+	TLSMode               string
+	InsecureSkipVerify    bool
+	Username              string
+	Password              string
+	HELO                  string
+	Timeout               time.Duration
+}
+
+func (c *Client) tlsConfig() *tls.Config {
+	return &tls.Config{
+		ServerName:         c.Host,
+		MinVersion:         tls.VersionTLS12,
+		InsecureSkipVerify: c.InsecureSkipVerify, //nolint:gosec // optional for internal/expired SMTP certs
+	}
 }
 
 // Send submits the archived RFC822 bytes.
@@ -46,7 +55,7 @@ func (c *Client) Send(ctx context.Context, msg message.Outbound) (provider.Resul
 	var conn net.Conn
 	var err error
 	if c.TLSMode == "tls" {
-		conn, err = tls.DialWithDialer(&net.Dialer{Timeout: timeout}, "tcp", addr, &tls.Config{ServerName: c.Host, MinVersion: tls.VersionTLS12})
+		conn, err = tls.DialWithDialer(&net.Dialer{Timeout: timeout}, "tcp", addr, c.tlsConfig())
 	} else {
 		conn, err = d.DialContext(dialCtx, "tcp", addr)
 	}
@@ -71,7 +80,7 @@ func (c *Client) Send(ctx context.Context, msg message.Outbound) (provider.Resul
 		if err := cmd(w, r, "STARTTLS"); err != nil {
 			return provider.Result{}, err
 		}
-		tlsConn := tls.Client(conn, &tls.Config{ServerName: c.Host, MinVersion: tls.VersionTLS12})
+		tlsConn := tls.Client(conn, c.tlsConfig())
 		if err := tlsConn.Handshake(); err != nil {
 			return provider.Result{}, provider.Transient("smtp", err.Error(), 0)
 		}

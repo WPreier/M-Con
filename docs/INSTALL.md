@@ -68,7 +68,7 @@ sudo install -d -m 0755 /usr/local/src
 cd /usr/local/src
 sudo git clone https://github.com/WPreier/M-Con.git
 cd M-Con
-git checkout v0.1.4   # oder ein neuerer Tag
+git checkout v0.1.5   # oder ein neuerer Tag
 
 v=$(tr -d ' \r\n' < VERSION)
 go build -ldflags "-X mcon/internal/version.Version=$v" -o mcon ./cmd/mcon
@@ -78,7 +78,7 @@ go build -ldflags "-X mcon/internal/version.Version=$v" -o mcon-ctl ./cmd/mcon-c
 ./mcon-ctl -version
 ```
 
-Beide Befehle müssen die gleiche SemVer ausgeben (z. B. `0.1.4`).
+Beide Befehle müssen die gleiche SemVer ausgeben (z. B. `0.1.5`).
 
 Optional Tests vor dem Deploy:
 
@@ -343,5 +343,6 @@ Beliebige andere Pfade sind erlaubt, solange der Prozess die Dateien lesen kann.
 | Public ohne TLS abgelehnt | Public-Addr nicht Loopback → TLS Pflicht |
 | Spam/OpenRouter-Fehler | `spam.openrouter.api_key` in `secrets.yaml` setzen oder Mode anpassen |
 | `mcon-ctl`: `unknown command -config` | Binary älter als die Flag-vor-Befehl-Unterstützung; neu bauen/installieren, oder `mcon-ctl health -config ~/mcon-ctl.yaml` |
+| SMTP: `certificate has expired or is not yet valid` | Internes/abgelaufenes Relay-Zertifikat → in `mcon.yaml` beim SMTP-Provider `tls_insecure_skip_verify: true` setzen und neu laden/restart |
 
 Weiterführend: [OPERATIONS.md](OPERATIONS.md), [CONFIG.md](CONFIG.md), [API.md](API.md), [TESTING.md](TESTING.md).

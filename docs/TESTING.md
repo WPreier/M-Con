@@ -37,7 +37,7 @@ In den drei Dateien setzen:
 
 | Datei | Pflicht |
 |---|---|
-| `mcon.yaml` | `providers.items.smtp-real.host` / `port` / `tls_mode` / `username`, `clients.local.allowed_from` (volle Absender-Adresse, die der Relay erlaubt) |
+| `mcon.yaml` | `providers.items.smtp-real.host` / `port` / `tls_mode` / `username`, bei internem/abgelaufenem Cert `tls_insecure_skip_verify: true`, `clients.local.allowed_from` (volle Absender-Adresse, die der Relay erlaubt) |
 | `secrets.yaml` | `providers.smtp-real.password`, Tokens/HMAC (mind. 16 Zeichen) — gleiche Werte wie in `mcon-ctl.yaml` |
 | `mcon-ctl.yaml` | `key_id: local`, passende `hmac_secret` / `admin_token` |
 

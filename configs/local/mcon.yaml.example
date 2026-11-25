@@ -69,6 +69,8 @@ providers:
       host: smtp.example.com
       port: 587
       tls_mode: starttls   # starttls | tls | none (none only to loopback)
+      # Internal/expired SMTP certificates: set true to skip TLS verify.
+      tls_insecure_skip_verify: true
       username: ""         # SMTP AUTH user; password belongs in secrets.yaml
       helo: mcon.local
       timeout: 45s
