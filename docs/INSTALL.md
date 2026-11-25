@@ -2,6 +2,16 @@
 
 Vollständige Anleitung für einen systemd-Host (Linux). Zielpfade und Rechte entsprechen `deploy/mcon.service`, `deploy/mcon.sysusers` und `deploy/mcon.tmpfiles`.
 
+## Arbeitsverzeichnis
+
+Als Installateur zuerst in das Quellverzeichnis wechseln:
+
+```bash
+cd /usr/local/src
+```
+
+Dort liegt (oder wird geklont) das Repository `M-Con`. Alle nachfolgenden `git`-, `go build`- und `cp deploy/...`-Schritte beziehen sich darauf, sofern nicht anders angegeben.
+
 ## Kurzantwort: wo liegt `secrets.yaml`?
 
 **Produktionspfad (systemd):**
@@ -54,9 +64,11 @@ Gleiches gilt für die Konfiguration: `-config` bzw. `MCON_CONFIG`.
 ## 1. Quellcode holen und bauen
 
 ```bash
-git clone https://github.com/WPreier/M-Con.git
+sudo install -d -m 0755 /usr/local/src
+cd /usr/local/src
+sudo git clone https://github.com/WPreier/M-Con.git
 cd M-Con
-git checkout v0.1.0   # oder ein neuerer Tag
+git checkout v0.1.3   # oder ein neuerer Tag
 
 v=$(tr -d ' \r\n' < VERSION)
 go build -ldflags "-X mcon/internal/version.Version=$v" -o mcon ./cmd/mcon
@@ -66,7 +78,7 @@ go build -ldflags "-X mcon/internal/version.Version=$v" -o mcon-ctl ./cmd/mcon-c
 ./mcon-ctl -version
 ```
 
-Beide Befehle müssen die gleiche SemVer ausgeben (z. B. `0.1.0`).
+Beide Befehle müssen die gleiche SemVer ausgeben (z. B. `0.1.3`).
 
 Optional Tests vor dem Deploy:
 
@@ -142,7 +154,8 @@ Beide Dateien mit realen Werten befüllen. Details: [CONFIG.md](CONFIG.md).
 - `server.public_addr` / `server.admin_addr` (`admin_addr` muss Loopback sein)
 - `paths.*` (Standard: unter `/var/lib/mcon`)
 - mindestens einen Provider unter `providers.items`
-- mindestens einen Client unter `clients` mit `allowed_from`
+- mindestens einen Client unter `clients` (Name beliebig, Beispiel `website` ist nur Platzhalter) mit `allowed_from` als vollständigen E-Mail-Adressen
+- bei aktiver Testseite: `test_ui.client_key_id` auf denselben Client-Namen setzen (sonst Validierungsfehler)
 - bei Public-Adresse außerhalb Loopback: `server.tls.enabled: true` plus Zertifikatspfad
 
 ### Pflicht in `secrets.yaml`
@@ -156,12 +169,41 @@ Beide Dateien mit realen Werten befüllen. Details: [CONFIG.md](CONFIG.md).
 
 ### TLS (Produktion hinter öffentlicher Adresse)
 
+M-Con erzeugt keine Zertifikate. Bei Public-Adresse außerhalb Loopback sind PEM-Dateien Pflicht. Quellen:
+
+1. **Let's Encrypt** (Certbot o. Ä.) — üblich für öffentliche Domains
+2. **Firmen-CA / IT** — internes Zertifikat + Key als PEM
+3. **Reverse-Proxy** (Nginx/Caddy) terminiert TLS; M-Con nur auf `127.0.0.1` → dann kein eigenes Zertifikat nötig
+
+Beispiel Let's Encrypt:
+
 ```bash
-sudo install -m 0640 -o root -g mcon /pfad/zum/cert.pem /etc/mcon/tls/cert.pem
-sudo install -m 0640 -o root -g mcon /pfad/zum/key.pem  /etc/mcon/tls/key.pem
+sudo certbot certonly --standalone -d mcon.example.com
+# typisch:
+#   /etc/letsencrypt/live/mcon.example.com/fullchain.pem
+#   /etc/letsencrypt/live/mcon.example.com/privkey.pem
 ```
 
-In `mcon.yaml` auf diese Dateien zeigen (`server.tls.cert_file` / `key_file`).
+**Dateien kopieren** (keine Symlinks nach `/etc/letsencrypt/live/...` — dort sind Verzeichnisse oft `0700 root`, dann scheitert User `mcon` mit `permission denied`):
+
+```bash
+sudo chown root:mcon /etc/mcon /etc/mcon/tls
+sudo chmod 0750 /etc/mcon /etc/mcon/tls
+sudo install -m 0640 -o root -g mcon \
+  /etc/letsencrypt/live/mcon.example.com/fullchain.pem /etc/mcon/tls/cert.pem
+sudo install -m 0640 -o root -g mcon \
+  /etc/letsencrypt/live/mcon.example.com/privkey.pem  /etc/mcon/tls/key.pem
+```
+
+Lesbarkeit als Dienstbenutzer prüfen:
+
+```bash
+sudo -u mcon test -r /etc/mcon/tls/cert.pem && echo OK cert
+sudo -u mcon test -r /etc/mcon/tls/key.pem && echo OK key
+namei -l /etc/mcon/tls/cert.pem
+```
+
+In `mcon.yaml` auf diese Dateien zeigen (`server.tls.cert_file` / `key_file`). Nach Certbot-Erneuerung denselben Copy-Schritt (Deploy-Hook) wiederholen und `systemctl restart mcon` bzw. `kill -s HUP`.
 
 ---
 
@@ -179,6 +221,8 @@ Smoke gegen den Admin-Port:
 scripts/smoke.sh http://127.0.0.1:8688
 # erwartet: healthz / readyz / version ohne Fehler
 ```
+
+Lokaler Echtversand (SMTP, ohne systemd): siehe [TESTING.md](TESTING.md) und `scripts/local-mail-test.sh`.
 
 Manuell:
 
@@ -206,13 +250,14 @@ chmod 0600 ~/mcon-ctl.yaml
 # public_url, admin_url, key_id, hmac_secret, admin_token eintragen
 ```
 
-Beispiele:
+Beispiele (Flags vor oder nach dem Unterbefehl; Config-Datei per `-config` oder Env `MCON_CTL_CONFIG`):
 
 ```bash
 mcon-ctl -config ~/mcon-ctl.yaml health
+mcon-ctl health -config ~/mcon-ctl.yaml
 mcon-ctl -config ~/mcon-ctl.yaml version
-mcon-ctl -config ~/mcon-ctl.yaml send -f testdata/contact.json
-mcon-ctl -config ~/mcon-ctl.yaml status --wait <message-id>
+mcon-ctl -config ~/mcon-ctl.yaml send --file testdata/contact.json
+mcon-ctl -config ~/mcon-ctl.yaml status --id <message-id> --wait
 ```
 
 Die ctl-Config darf **außerhalb** von `/etc/mcon` liegen (z. B. Home-Verzeichnis des Operators). Der Daemon liest sie nicht; er kennt nur `-config`/`-secrets` der Unit.
@@ -244,7 +289,7 @@ curl -fsS -X POST -H "Authorization: Bearer <admin-token>" \
 Update auf neue Version:
 
 ```bash
-cd M-Con
+cd /usr/local/src/M-Con
 git fetch --tags
 git checkout vX.Y.Z
 v=$(tr -d ' \r\n' < VERSION)
@@ -278,6 +323,8 @@ Beliebige andere Pfade sind erlaubt, solange der Prozess die Dateien lesen kann.
 - [ ] `admin.token` und HMAC-Secrets ≥ 16 Zeichen
 - [ ] Provider-Zugangsdaten und Fallback getestet
 - [ ] TLS aktiv, falls Public-Addr nicht Loopback
+- [ ] `/etc/mcon/tls/cert.pem` und `key.pem` vorhanden, `0640 root:mcon`, **keine** Symlinks nach Let's Encrypt
+- [ ] `sudo -u mcon test -r /etc/mcon/tls/cert.pem` erfolgreich
 - [ ] `systemctl is-active mcon` → `active`
 - [ ] `smoke.sh` bzw. `/healthz` + `/readyz` ok
 - [ ] Testmail mit `mcon-ctl send` zugestellt
@@ -291,8 +338,10 @@ Beliebige andere Pfade sind erlaubt, solange der Prozess die Dateien lesen kann.
 |---|---|
 | `mcon: config and secrets are required` | `-config`/`-secrets` oder `MCON_CONFIG`/`MCON_SECRETS` fehlen |
 | startet und stirbt sofort (Permission) | `secrets.yaml` nicht lesbar für User `mcon` → Gruppe `mcon`, Mode `0440` |
+| `tls file .../cert.pem: permission denied` | User `mcon` darf Datei/Verzeichnis nicht lesen: `chown root:mcon`, `chmod 0750` auf `/etc/mcon` und `/etc/mcon/tls`, `chmod 0640` auf PEM; **keine** Symlinks nach `/etc/letsencrypt/live/` — Dateien kopieren, dann `sudo -u mcon test -r ...` |
 | Unit startet, Config „nicht gefunden“ | Datei nicht unter `/etc/mcon/` oder falscher `ExecStart`-Pfad |
 | Public ohne TLS abgelehnt | Public-Addr nicht Loopback → TLS Pflicht |
 | Spam/OpenRouter-Fehler | `spam.openrouter.api_key` in `secrets.yaml` setzen oder Mode anpassen |
+| `mcon-ctl`: `unknown command -config` | Binary älter als die Flag-vor-Befehl-Unterstützung; neu bauen/installieren, oder `mcon-ctl health -config ~/mcon-ctl.yaml` |
 
 Weiterführend: [OPERATIONS.md](OPERATIONS.md), [CONFIG.md](CONFIG.md), [API.md](API.md), [TESTING.md](TESTING.md).

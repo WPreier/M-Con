@@ -22,6 +22,51 @@ Die Suite läuft ohne CGO (`modernc.org/sqlite`) und ohne echte Provider. Abgede
 
 Fixtures liegen in `testdata/` (`contact.json`, `spam_samples.json`, `note.txt`).
 
+## Lokaler Echtversand
+
+Zum Testen gegen einen echten SMTP-Relay (kein Unit-Test, echte Zustellung):
+
+```bash
+cd /usr/local/src/M-Con   # oder Repo-Root
+cp configs/local/mcon.yaml.example configs/local/mcon.yaml
+cp configs/local/secrets.yaml.example configs/local/secrets.yaml
+cp configs/local/mcon-ctl.yaml.example configs/local/mcon-ctl.yaml
+```
+
+In den drei Dateien setzen:
+
+| Datei | Pflicht |
+|---|---|
+| `mcon.yaml` | `providers.items.smtp-real.host` / `port` / `tls_mode` / `username`, `clients.local.allowed_from` (volle Absender-Adresse, die der Relay erlaubt) |
+| `secrets.yaml` | `providers.smtp-real.password`, Tokens/HMAC (mind. 16 Zeichen) — gleiche Werte wie in `mcon-ctl.yaml` |
+| `mcon-ctl.yaml` | `key_id: local`, passende `hmac_secret` / `admin_token` |
+
+Dann:
+
+```bash
+# eine Testmail senden und mcon danach beenden
+MCON_TEST_FROM='noreply@example.com' MCON_TEST_TO='du@example.com' \
+  scripts/local-mail-test.sh
+
+# mcon laufen lassen (Test-UI unter http://127.0.0.1:8688/test/)
+scripts/local-mail-test.sh --daemon
+
+# gegen laufenden lokalen Daemon nur senden
+MCON_TEST_TO='du@example.com' scripts/local-mail-test.sh --send-only
+
+# senden und Daemon danach weiterlaufen lassen
+MCON_TEST_TO='du@example.com' scripts/local-mail-test.sh --keep
+```
+
+Das Skript baut `bin/mcon` und `bin/mcon-ctl`, legt State unter `./var/local/` ab (gitignored), startet auf `127.0.0.1:8687` / `:8688` ohne TLS und wartet auf `state=sent`.
+
+Hinweise:
+
+- `from` muss in `allowed_from` stehen und vom SMTP-Provider als Absender akzeptiert werden.
+- Spam ist in der Local-Config aus (`spam.enabled: false`).
+- Zum Debuggen ohne Zustellung `providers.default: discard` setzen.
+- Nach dem Test Posteingang **und** Spam-Ordner prüfen; Provider-Fehler stehen in `var/local/mcon.log`.
+
 ## Versionierung
 
 `scripts/hooks/commit-msg` prüft Conventional Commits gegen `VERSION` und den Changelog. Aktivieren, ohne das Repo zu verändern, mit `git config core.hooksPath scripts/hooks`. `scripts/bump-version.sh patch|minor|major` schreibt die nächste Nummer.

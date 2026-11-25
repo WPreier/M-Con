@@ -1,0 +1,7 @@
+# Copy to configs/local/mcon-ctl.yaml. Values must match secrets.yaml / clients.local.
+public_url: http://127.0.0.1:8687
+admin_url: http://127.0.0.1:8688
+key_id: local
+hmac_secret: local-hmac-secret-change-me
+admin_token: local-admin-token-change-me
+insecure_skip_verify: false

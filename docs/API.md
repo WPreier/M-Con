@@ -44,7 +44,7 @@ hex(sha256(body))
 }
 ```
 
-`from` muss in `allowed_from` stehen. CR oder LF in Adressen, Betreff oder Headern ergibt 400. Bcc steht nur im Envelope, nicht im RFC822-Header.
+`from` muss exakt in `allowed_from` stehen (vollständige E-Mail-Adresse, keine Domain). Der Client-Name unter `clients:` ist die HMAC-`key_id` und beliebig wählbar; bei aktiver Testseite muss `test_ui.client_key_id` denselben Namen tragen. CR oder LF in Adressen, Betreff oder Headern ergibt 400. Bcc steht nur im Envelope, nicht im RFC822-Header.
 
 Antwort 202:
 

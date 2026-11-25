@@ -14,6 +14,37 @@
 - Provider-Namen und Client-IDs bestehen aus Buchstaben, Ziffern, Punkt, Unterstrich und Bindestrich.
 - Ein Fallback verweist auf einen anderen definierten Provider und nie auf sich selbst.
 
+## Clients
+
+Der Schlüssel unter `clients:` (in den Beispielen `website`) ist nur ein **Platzhalter**. Der Name ist frei wählbar (z. B. `kmbcloud`, `intranet`) und ist zugleich die HMAC-`key_id` der absendenden Website. Derselbe Name muss in `secrets.yaml` unter `clients.<id>.hmac_secret` stehen.
+
+`allowed_from` ist eine Liste **vollständiger E-Mail-Adressen** (mit `@`), keine Domains. Der Abgleich mit dem JSON-Feld `from` ist exakt (Groß/Klein egal). Domains allein (`kmbcloud.at`) sind ungültig und führen zu einem Validierungsfehler.
+
+```yaml
+clients:
+  kmbcloud:
+    allowed_from:
+      - noreply@kmbcloud.at
+      - kontakt@kmbcloud.at
+  andere-site:
+    allowed_from:
+      - form@andere.at
+```
+
+Mehrere Websites: entweder mehrere Adressen unter einem Client (gemeinsames HMAC-Secret) oder je Website ein eigener Client mit eigenem Secret (empfohlen).
+
+### `test_ui.client_key_id`
+
+Wenn `test_ui.enabled: true` ist, **muss** `test_ui.client_key_id` genau auf einen existierenden Client-Namen zeigen. Nach dem Umbenennen von `website` also auch anpassen, sonst startet M-Con nicht (Validierungsfehler: `test_ui.client_key_id "…" is not a client`).
+
+```yaml
+test_ui:
+  enabled: true
+  client_key_id: kmbcloud   # gleicher Name wie unter clients:
+```
+
+Ist die Testseite nicht nötig: `test_ui.enabled: false` — dann entfällt die Pflicht für `client_key_id`.
+
 ## Pfade
 
 | Schlüssel | Host-Pfad |
@@ -35,8 +66,6 @@ Das State-Verzeichnis ist `0700`, die Secrets-Datei `0440` (`root:mcon`), die Ko
 `dedupe.window` fasst gleiche `body_sha256` desselben Clients zusammen. Resends sind ausgenommen.
 
 `backup.interval` schreibt per `VACUUM INTO` nach `paths.backup_dir`.
-
-`test_ui.client_key_id` muss ein konfigurierter Client sein, wenn die Testseite an ist.
 
 ## Secrets
 

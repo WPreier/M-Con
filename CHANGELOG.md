@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-11-25
+
+### Added
+
+- Local real-mail test harness: `configs/local/*.example` and `scripts/local-mail-test.sh` (SMTP Echtversand, Test-UI, documented in TESTING.md).
+- Client configuration docs: `website` is a placeholder id, `allowed_from` requires full email addresses, `test_ui.client_key_id` must match.
+
+### Changed
+
+- INSTALL: start in `/usr/local/src`, expanded TLS section (Let's Encrypt copy vs symlink, `0640 root:mcon`, permission-denied troubleshooting).
+- `mcon-ctl` accepts flags before or after the subcommand (e.g. `-config … health`).
+- Mark `scripts/smoke.sh`, `scripts/bump-version.sh`, and `scripts/local-mail-test.sh` executable in git (`100755`).
+
 ## [0.1.2] - 2026-11-23
 
 ### Fixed

@@ -12,3 +12,6 @@
 .env
 secrets.yaml
 mcon.yaml
+configs/local/mcon.yaml
+configs/local/secrets.yaml
+configs/local/mcon-ctl.yaml

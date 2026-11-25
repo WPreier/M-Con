@@ -1,0 +1,117 @@
+# Local real-mail test config. Copy to configs/local/mcon.yaml and edit.
+# Start with: scripts/local-mail-test.sh
+# Loopback only — no TLS. Data under ./var/local (gitignored).
+
+server:
+  public_addr: "127.0.0.1:8687"
+  admin_addr: "127.0.0.1:8688"
+  read_timeout: 15s
+  write_timeout: 30s
+  idle_timeout: 60s
+  shutdown_timeout: 10s
+  max_body_bytes: 26214400
+  watchdog_interval: 10s
+  tls:
+    enabled: false
+
+paths:
+  data_dir: ./var/local
+  db_file: ./var/local/mcon.db
+  archive_dir: ./var/local/archive
+  tmp_dir: ./var/local/tmp
+  backup_dir: ./var/local/backups
+
+log:
+  level: debug
+  syslog:
+    enabled: false
+
+metrics:
+  enabled: true
+
+queue:
+  workers: 1
+  poll_interval: 200ms
+  lease: 60s
+  max_attempts: 5
+  backoff_initial: 2s
+  backoff_max: 5m
+  backoff_multiplier: 2
+
+circuit_breaker:
+  failure_threshold: 5
+  cooldown: 30s
+
+# Spam off for a clean delivery test. Enable later if needed.
+spam:
+  enabled: false
+  mode: ollama
+  timeout: 8s
+  on_timeout: send
+  on_error: send
+  threshold: 0.8
+  ollama:
+    base_url: http://127.0.0.1:11434
+    model: llama3.2
+    timeout: 6s
+  openrouter:
+    base_url: https://openrouter.ai/api/v1
+    model: openai/gpt-4o-mini
+    timeout: 8s
+
+providers:
+  default: smtp-real
+  items:
+    smtp-real:
+      type: smtp
+      # Fill with your real relay (provider SMTP or company MTA).
+      host: smtp.example.com
+      port: 587
+      tls_mode: starttls   # starttls | tls | none (none only to loopback)
+      username: ""         # SMTP AUTH user; password belongs in secrets.yaml
+      helo: mcon.local
+      timeout: 45s
+      fallback: ""
+    # Optional: catch-all sink while debugging (no real delivery).
+    discard:
+      type: discard
+      mode: success
+
+clients:
+  local:
+    allowed_from:
+      # Must be an address your SMTP provider allows you to send as.
+      - noreply@example.com
+    allowed_providers: []
+    max_recipients: 5
+    max_message_bytes: 10485760
+    max_attachments: 5
+    rate_limit:
+      rps: 2
+      burst: 5
+    webhook_url: ""
+
+archive:
+  enabled: true
+
+idempotency:
+  ttl: 1h
+
+security:
+  hmac_window: 5m
+  nonce_ttl: 10m
+  admin_allow_cidrs:
+    - 127.0.0.1/32
+    - ::1/128
+
+dedupe:
+  enabled: false
+  window: 10m
+
+backup:
+  enabled: false
+  interval: 24h
+
+test_ui:
+  enabled: true
+  client_key_id: local

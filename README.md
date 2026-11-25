@@ -26,4 +26,6 @@ Installation Schritt für Schritt: [docs/INSTALL.md](docs/INSTALL.md) (`secrets.
 go test ./...
 ```
 
-Version `0.1.2`. Conventional Commits (`feat`, `fix`, `BREAKING CHANGE`) prüft `scripts/hooks/commit-msg`.
+Lokaler Echtversand per SMTP: [docs/TESTING.md](docs/TESTING.md) und `scripts/local-mail-test.sh`.
+
+Version `0.1.3`. Conventional Commits (`feat`, `fix`, `BREAKING CHANGE`) prüft `scripts/hooks/commit-msg`.

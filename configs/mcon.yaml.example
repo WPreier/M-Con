@@ -120,6 +120,10 @@ providers:
       token_url: https://oauth2.googleapis.com/token
       timeout: 30s
 
+# "website" is a placeholder client id / HMAC key_id — rename freely.
+# allowed_from: full email addresses only (not bare domains).
+# Keep the same id under secrets.yaml clients.<id>.hmac_secret
+# and, if test_ui is enabled, under test_ui.client_key_id.
 clients:
   website:
     allowed_from:
@@ -154,6 +158,7 @@ backup:
   enabled: true
   interval: 24h
 
+# client_key_id must match a key under clients: (or set enabled: false).
 test_ui:
   enabled: true
   client_key_id: website

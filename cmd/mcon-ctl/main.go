@@ -19,14 +19,19 @@ func main() {
 
 func run(args []string) int {
 	if len(args) == 0 {
-		fmt.Fprintln(os.Stderr, "usage: mcon-ctl [--flags] send|status|resend|replay|health|version")
+		fmt.Fprintln(os.Stderr, "usage: mcon-ctl [--flags] <send|status|resend|replay|health|version> [--flags]")
 		return 2
 	}
 	if args[0] == "-version" || args[0] == "--version" {
 		fmt.Println(version.Version)
 		return 0
 	}
-	cmd := args[0]
+	cmd, flagArgs, ok := splitCommand(args)
+	if !ok {
+		fmt.Fprintln(os.Stderr, "unknown command", args[0])
+		fmt.Fprintln(os.Stderr, "usage: mcon-ctl [--flags] <send|status|resend|replay|health|version> [--flags]")
+		return 2
+	}
 	fs := flag.NewFlagSet("mcon-ctl", flag.ContinueOnError)
 	fs.SetOutput(os.Stderr)
 	configPath := fs.String("config", os.Getenv("MCON_CTL_CONFIG"), "client config file")
@@ -41,7 +46,7 @@ func run(args []string) int {
 	wait := fs.Bool("wait", false, "poll status until a terminal state")
 	timeout := fs.Duration("timeout", 30*time.Second, "wait timeout")
 	skipSpam := fs.Bool("skip-spam", false, "resend without the spam check")
-	if err := fs.Parse(args[1:]); err != nil {
+	if err := fs.Parse(flagArgs); err != nil {
 		return 2
 	}
 	opt := ctl.Options{Insecure: *insecure}
@@ -125,4 +130,18 @@ func run(args []string) int {
 	}
 	fmt.Println(out)
 	return 0
+}
+
+func splitCommand(args []string) (cmd string, flagArgs []string, ok bool) {
+	known := map[string]struct{}{
+		"send": {}, "status": {}, "resend": {}, "replay": {}, "health": {}, "version": {},
+	}
+	for i, a := range args {
+		if _, hit := known[a]; !hit {
+			continue
+		}
+		flagArgs = append(append([]string{}, args[:i]...), args[i+1:]...)
+		return a, flagArgs, true
+	}
+	return "", nil, false
 }
